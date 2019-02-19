@@ -1,0 +1,203 @@
+Codec 2 README
+--------------
+
+Codec 2 is an open source (LGPL 2.1) low bit rate speech codec:
+
+    http://rowetel.com/codec2.html
+
+Also included:
+
+  + FDMDV modem (README_fdmdv.txt) for HF channels
+  + Coherent PSK (cohpsk) for HF channels
+  + FSK modem (README_fsk.txt) for VHF channels
+  + an OFDM modem for HF channels (ofdm)
+  + the FreeDV API - a library for embedding FreeDV in other programs
+
+SVN Repository
+--------------
+
+Check out the latest (development branch) code using:
+
+  $ svn co https://svn.code.sf.net/p/freetel/code/codec2-dev codec2-dev
+
+There are unauthorised 3rd party GIT mirrors of Codec 2.
+
+  GIT IS NOT SUPPORTED!!!
+
+All patches, support questions etc, need to be against the SVN
+repository above.
+
+Quickstart
+----------
+
+Also see INSTALL for more general building and installing instructions. 
+
+1/ Listen to Codec 2:
+
+   $ cd codec2-dev
+   $ mkdir build_linux
+   $ cd build_linux
+   $ cmake ..
+   $ make
+   $ ./src/c2demo ../raw/hts1a.raw hts1a_c2.raw
+   $ play -t raw -r 8000 -e signed-integer -b 16 ../raw/hts1a.raw
+   $ play -t raw -r 8000 -e signed-integer -b 16 ./hts1a_c2.raw
+
+2/ Compress, Decompress and then play a file:
+
+   using 2400 bps bit rate encoding
+
+   $ ./src/c2enc 2400 ../raw/hts1a.raw hts1a_c2.bit
+   $ ./src/c2dec 2400 hts1a_c2.bit hts1a_c2_2400.raw 
+
+   which can be played with
+
+   $ play -t raw -r 8000 -e signed-integer -b 16 ./hts1a_c2_2400.raw
+
+   using 700 bps bit rate encoding
+
+   $ ./src/c2enc 700 ../raw/hts1a.raw hts1a_c2.bit
+   $ ./src/c2dec 700 hts1a_c2.bit hts1a_c2_700.raw
+
+   which can be played with
+
+   $ play -t raw -r 8000 -e signed-integer -b 16 ./hts1a_c2_700.raw
+
+3/ Same thing with pipes:
+
+   $ ./src/c2enc 1300 ../raw/hts1a.raw - | ./src/c2dec 1300 - - | play -t raw -r 8000 -s -2 -
+
+Programs
+--------
+ 
+1/ c2demo encodes a file of speech samples, then decodes them and
+saves the result.
+
+2/ c2enc encodes a file of speech samples to a compressed file of
+encoded bits.
+
+3/ c2dec decodes a compressed file of bits to a file of speech
+samples.
+
+4/ c2sim is a simulation/development version of Codec 2.  It allows
+selective use of the various Codec 2 algorithms.  For example
+switching phase modelling or LSP quantisation on and off.
+
+Debugging
+---------
+
+1/ To compile with debug symbols for using gdb:
+
+  $ cd ~/codec2
+  $ rm -Rf build_linux && mkdir build_linux
+  $ cd build_linux
+  $ CFLAGS=-g cmake ..
+  $ make
+
+2/ For dump file support:
+
+  $ cd ~/codec2
+  $ rm -Rf build_linux && mkdir build_linux
+  $ cd build_linux
+  $ CFLAGS=-DDUMP cmake ..
+  $ make
+
+Building Unit Tests
+-------------------
+
+The unittests are no longer built by default.  They require
+libsamplerate and Speex.
+
+To build them:
+
+  $ cd ~/codec2
+  $ rm -Rf build_linux && mkdir build_linux
+  $ cd build_linux
+  $ cmake -DCMAKE_BUILD_TYPE=Debug ..
+  $ make
+
+Building for Windows on a Linuxmachine
+--------------------------------------
+
+On Ubuntu 17:
+
+  $ sudo apt-get install mingw-w64
+  $ mkdir build_windows && cd build_windows
+  $ cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/david/freedv-dev/cmake/Toolchain-Ubuntu-mingw32.cmake -DUNITTEST=FALSE -DGENERATE_CODEBOOK=/home/david/codec2-dev/build_linux/src/generate_codebook 
+  $ make
+  
+Building for Windows on a Windows machine
+-----------------------------------------
+
+ mkdir build_windows (Or what ever you want to call your build dir)
+ cmake -G "MinGW Makefiles" -D CMAKE_MAKE_PROGRAM=mingw32-make.exe
+ Or if you use ninja for building cmake -G "Ninja" ..
+ mingw32-make or ninja  depends on what you used in the last command
+ wait for it to build.
+
+Directories
+-----------
+
+  cmake       - cmake support files
+  octave      - Octave scripts used to support development
+  script      - shell scripts for playing and converting raw files
+  src         - C source code for Codec 2, FDMDV modem, COHPSK modem, FreeDV API
+  raw         - speech files in raw format (16 bits signed linear 8 kHz)
+  stm32       - STM32F4 microcontroller and SM1000 FreeDV Adaptor
+  unittest    - unit test source code
+  wav         - speech files in wave file format
+
+Octave Packages
+---------------
+
+To run the Octave scripts the following libraries are required:
+
+Package Name  | Version | Installation directory
+--------------+---------+-----------------------
+     control *|   2.6.2 | /usr/share/octave/packages/control-2.6.2
+     general *|   1.3.4 | /usr/share/octave/packages/general-1.3.4
+    parallel *|   2.2.0 | /usr/share/octave/packages/parallel-2.2.0
+        plot *|   1.1.0 | /usr/share/octave/packages/plot-1.1.0
+      signal *|   1.2.2 | /usr/share/octave/packages/signal-1.2.2
+     specfun *|   1.1.0 | /usr/share/octave/packages/specfun-1.1.0
+
+These can be installed using your systems package management system or
+the Octave package management system.  The version number of each
+package is not important.
+
+FreeDV API
+----------
+
+See freedv_api.h and freedv_api.c, and the demo programs freedv_tx &
+freedv_rx.  Quickstart demo using FreeDV 1600:
+
+  $ ./freedv_tx 1600 ../../raw/hts1.raw - | ./freedv_rx 1600 - - | play -t raw -r 8000 -s -2 -q -
+  $ cat freedv_rx_log.txt
+
+FreeDV 2400A and 2400B modes
+----------------------------
+
+FreeDV 2400A and FreeDV 2400B are modes designed for VHF radio.
+FreeDV 2400A is designed for SDR radios (it has a 5 kHz RF bandwidth),
+however FreeDV 2400B is designed to pass through commodity FM radios.
+
+Demos of FreeDV 2400A and 2400B:
+
+  $ ./freedv_tx 2400A ../../raw/ve9qrp_10s.raw - | ./freedv_rx 2400A - - | play -t raw -r 8000 -s -2 -
+  $ ./freedv_tx 2400B ../../raw/ve9qrp_10s.raw - | ./freedv_rx 2400B - - | play -t raw -r 8000 -s -2 -
+
+Note for FreeDV 2400A/2400B the modem signal sample rate is 48kHz.  To
+listen to the modem tones from FreeDV 2400B, or play them into a FM HT
+mic input:
+
+  $ ./freedv_tx 2400B ../../raw/ve9qrp_10s.raw - | play -t raw -r 48000 -s -2 -
+
+Simulate FreeDV 2400B passing through a 300 to 3000 Hz audio path using sox to filter:
+
+  $  ./freedv_tx 2400B ../../raw/ve9qrp_10s.raw - | sox -t raw -r 48000 -s -2 - -t raw - sinc 300-3000 | ./freedv_rx 2400B - - | play -t raw -r 8000 -s -2 -
+
+Links:
+
+  FreeDV 2400A blog post ...: http://www.rowetel.com/?p=5119
+  FreeDV 2400A & 2400B demos: http://www.rowetel.com/?p=5219
+
