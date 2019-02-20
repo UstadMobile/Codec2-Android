@@ -1,8 +1,8 @@
 #include <jni.h>
 #include <stdlib.h>
-#include "codec2/codec2_fdmdv.h"
-#include "codec2/codec2.h"
-#include "codec2/varicode.h"
+#include "codec2/src/codec2_fdmdv.h"
+#include "codec2/src/codec2.h"
+#include "codec2/src/varicode.h"
 
 namespace Java_com_ustadmobile_codec2_Codec2 {
 
