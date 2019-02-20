@@ -16,20 +16,20 @@ add_subdirectory(libsamplerate)
 add_subdirectory(codec2)
 
 # Maybe this needs to be samplerate/src
-add_library(LIBSAMPLERATE SHARED libsamplerate/src/samplerate.c)
+# add_library(LIBSAMPLERATE samplerate.c)
+#target_link_libraries(codec2 libsamplerate)
+
+#add_library( # Sets the name of the library.
+#       Codec2JNI
+#
+## Sets the library as a shared library.
+#SHARED
+#
+## Provides a relative path to your source file(s).
+#Codec2JNI.cpp)
 
 
-add_library( # Sets the name of the library.
-       Codec2JNI
-
-# Sets the library as a shared library.
-SHARED
-
-# Provides a relative path to your source file(s).
-Codec2JNI.cpp)
-
-
-include_directories(src/main/cpp/codec2/)
+# include_directories(src/main/cpp/codec2/)
 
 
 
@@ -51,9 +51,9 @@ find_library( # Sets the name of the path variable.
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
-target_link_libraries( # Specifies the target library.
-        Codec2JNI
-
-        # Links the target library to the log library
-        # included in the NDK.
-        ${log-lib})
+#target_link_libraries( # Specifies the target library.
+#        Codec2JNI
+#
+#        # Links the target library to the log library
+#        # included in the NDK.
+#        ${log-lib})
