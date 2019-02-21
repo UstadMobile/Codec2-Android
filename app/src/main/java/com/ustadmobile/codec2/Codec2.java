@@ -4,6 +4,7 @@ public class Codec2 {
 
     static {
         System.loadLibrary("codec2");
+        System.loadLibrary("Codec2JNI");
     }
 
     public static final int CODEC2_MODE_3200 = 0;

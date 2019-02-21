@@ -1,17 +1,17 @@
 #include <jni.h>
 #include <stdlib.h>
-#include "codec2/src/codec2_fdmdv.h"
-#include "codec2/src/codec2.h"
-#include "codec2/src/varicode.h"
+#include "codec2/codec2_fdmdv.h"
+#include "codec2/codec2.h"
+#include "codec2/varicode.h"
 
 namespace Java_com_ustadmobile_codec2_Codec2 {
 
     struct Context {
         struct CODEC2 *c2;
-        short *buf;
-        unsigned char *bits;
-        short samples;
-        short nbyte;
+        short *buf; //raw audio data
+        unsigned char *bits; //codec2 data
+        short samples; //number of samples per frame - e.g. raw (uncompressed) size = samples per frame
+        short nbyte;//size of one frame of codec2 data
     };
 
     static Context *getContext(jlong jp) {
