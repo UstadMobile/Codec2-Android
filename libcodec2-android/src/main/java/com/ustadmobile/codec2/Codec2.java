@@ -18,6 +18,12 @@ public class Codec2 {
     public static final int CODEC2_MODE_700C = 8;
     public static final int CODEC2_MODE_WB = 9;
 
+    /**
+     * The size of the file header that is written when using c2enc. When decoding, this must be
+     * skipped.
+     */
+    public static final int CODEC2_FILE_HEADER_SIZE = 7;
+
     public native static long create(int mode);
 
     public native static int getSamplesPerFrame(long con);
@@ -38,4 +44,5 @@ public class Codec2 {
      * @return 0 on successful completion
      */
     public native static long decode(long con, short[] outputBuffer, byte[] bits);
+
 }

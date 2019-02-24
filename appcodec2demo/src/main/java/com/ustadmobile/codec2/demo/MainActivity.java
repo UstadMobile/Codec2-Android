@@ -1,4 +1,4 @@
-package com.ustadmobile.codec2;
+package com.ustadmobile.codec2.demo;
 
 import android.content.res.AssetManager;
 import android.media.AudioFormat;
@@ -6,6 +6,9 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.ustadmobile.codec2.Codec2;
+import com.ustadmobile.codec2.Codec2Decoder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(com.ustadmobile.codec2.R.layout.activity_main);
 
         new Thread(() -> {
             AssetManager asMgr = getApplicationContext().getAssets();
@@ -29,12 +32,14 @@ public class MainActivity extends AppCompatActivity {
                     8000,
                     AudioFormat.CHANNEL_OUT_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,
-                    intSize,
+                    intSize * 3,
                     AudioTrack.MODE_STREAM);
             track.play();
+            Codec2Decoder codec2 = null;
             try {
-                InputStream is = asMgr.open("video2-1300.c2");
-                Codec2Decoder codec2 = new Codec2Decoder(is, Codec2.CODEC2_MODE_1300);
+                InputStream is = asMgr.open("video2-2400.c2");
+                is.skip(Codec2.CODEC2_FILE_HEADER_SIZE);
+                codec2 = new Codec2Decoder(is, Codec2.CODEC2_MODE_2400);
 
                 while (true) {
                     ByteBuffer buffer = codec2.readFrame();
@@ -47,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
 
             } catch (IOException e) {
                 e.printStackTrace();
+            }finally  {
+                track.release();
+                if(codec2 != null)
+                    codec2.destroy();
             }
         }).start();
     }

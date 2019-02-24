@@ -9,8 +9,9 @@ namespace Java_com_ustadmobile_codec2_Codec2 {
         struct CODEC2 *c2;
         short *buf; //raw audio data
         unsigned char *bits; //codec2 data
-        short samples; //nsam: number of samples per frame - e.g. raw (uncompressed) size = samples per frame
-        short nbyte;//size of one frame of codec2 data
+        int nsam; //nsam: number of samples per frame - e.g. raw (uncompressed) size = samples per frame
+        int nbit;
+        int nbyte;//size of one frame of codec2 data
     };
 
     static Context *getContext(jlong jp) {
@@ -26,18 +27,19 @@ namespace Java_com_ustadmobile_codec2_Codec2 {
         struct CODEC2 *c;
         c = codec2_create(mode);
         con->c2 = c;
-        con->samples = codec2_samples_per_frame(c);
-        con->buf = (short *) malloc(sizeof(short) * con->samples);
-        int nbit = codec2_bits_per_frame(con->c2);
-        con->nbyte = (nbit + 7) / 8;
-        con->bits = (unsigned char *) malloc(con->nbyte * sizeof(char));
+        con->nsam = codec2_samples_per_frame(c);
+        con->nbit = codec2_bits_per_frame(con->c2);
+        con->buf = (short*)malloc(con->nsam*sizeof(short));
+        con->nbyte = (con->nbit +  7) / 8;
+        con->bits = (unsigned char*)malloc(con->nbyte*sizeof(char));
         unsigned long pv = (unsigned long) con;
+
         return pv;
     }
 
     static jint c2spf(JNIEnv *env, jclass clazz, jlong n) {
         Context *con = getContext(n);
-        return con->samples;
+        return con->nsam;
     }
 
     static jint c2bits(JNIEnv *env, jclass clazz, jlong n) {
@@ -60,7 +62,7 @@ namespace Java_com_ustadmobile_codec2_Codec2 {
         Context *con = getContext(n);
         int i;
         jshort *jbuf = env->GetShortArrayElements(inputBuffer, 0);
-        for (i = 0; i < con->samples; i++) {
+        for (i = 0; i < con->nsam; i++) {
             // Downsampling to F/2
             short v = (short) jbuf[i * 2];
             con->buf[i] = v;
@@ -84,7 +86,7 @@ namespace Java_com_ustadmobile_codec2_Codec2 {
 
         codec2_decode_ber(con->c2, con->buf, con->bits, 0.0);
 
-        env->SetShortArrayRegion(outBuffer, 0, con->samples, con->buf);
+        env->SetShortArrayRegion(outBuffer, 0, con->nsam, con->buf);
 
         return 0;
     }

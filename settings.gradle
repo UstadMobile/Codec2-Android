@@ -1,1 +1,1 @@
-include ':libcodec2-android'
+include ':libcodec2-android', ':appcodec2demo'
