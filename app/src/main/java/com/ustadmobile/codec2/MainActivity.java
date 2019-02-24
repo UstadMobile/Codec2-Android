@@ -48,10 +48,9 @@ public class MainActivity extends AppCompatActivity {
             char[] codec2InBuf = new char[Codec2.getBitsSize(con)];
             byte[] codec2InBufBytes = new byte[codec2InBuf.length];
             ByteBuffer buffer = ByteBuffer.allocate(Codec2.getSamplesPerFrame(con) * 2 * 2);
-
+            buffer.order(ByteOrder.nativeOrder());
             while (is.read(codec2InBufBytes) == codec2InBufBytes.length) {
                 //should be read from stream as character array of this length. The c2dec method reads in as char
-
                 for (int i = 0; i < codec2InBufBytes.length; i++) {
                     codec2InBuf[i] = (char) codec2InBufBytes[i];
                 }
@@ -62,12 +61,8 @@ public class MainActivity extends AppCompatActivity {
                 buffer.clear();
                 for (int i = 0; i < rawAudioOutBuf.length; i++) {
                     buffer.putShort(rawAudioOutBuf[i]);
-                    boutBuf[0] = (byte) (rawAudioOutBuf[i] & 0xFF);
-                    boutBuf[1] = (byte) ((rawAudioOutBuf[i] << 8) & 0xFF);
-//                    bout.write(boutBuf);
-//                    track.write(boutBuf, 0, boutBuf.length);
                 }
-                track.write(buffer,buffer.capacity(),AudioTrack.WRITE_BLOCKING );
+                track.write(buffer.array(), 0, buffer.capacity());
             }
 
             Codec2.destroy(con);
