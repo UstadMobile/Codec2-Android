@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "codec2/codec2_fdmdv.h"
 #include "codec2/codec2.h"
-#include "codec2/varicode.h"
 
 namespace Java_com_ustadmobile_codec2_Codec2 {
 
@@ -10,7 +9,7 @@ namespace Java_com_ustadmobile_codec2_Codec2 {
         struct CODEC2 *c2;
         short *buf; //raw audio data
         unsigned char *bits; //codec2 data
-        short samples; //number of samples per frame - e.g. raw (uncompressed) size = samples per frame
+        short samples; //nsam: number of samples per frame - e.g. raw (uncompressed) size = samples per frame
         short nbyte;//size of one frame of codec2 data
     };
 
@@ -28,7 +27,7 @@ namespace Java_com_ustadmobile_codec2_Codec2 {
         c = codec2_create(mode);
         con->c2 = c;
         con->samples = codec2_samples_per_frame(c);
-        con->buf = (short *) malloc(2 * sizeof(short) * con->samples);
+        con->buf = (short *) malloc(sizeof(short) * con->samples);
         int nbit = codec2_bits_per_frame(con->c2);
         con->nbyte = (nbit + 7) / 8;
         con->bits = (unsigned char *) malloc(con->nbyte * sizeof(char));
@@ -78,29 +77,15 @@ namespace Java_com_ustadmobile_codec2_Codec2 {
         return 0;
     }
 
-    static jlong decode(JNIEnv *env, jclass clazz, jlong n,
-                        jshortArray inputBuffer,
-                        jcharArray outputBits) {
-        int i;
+    static jlong decode(JNIEnv *env, jclass clazz, jlong n, jshortArray outBuffer, jbyteArray inBuffer) {
         Context *con = getContext(n);
 
-        jchar *jbits = env->GetCharArrayElements(outputBits, 0);
-        for (i = 0; i < con->nbyte; i++) {
-            con->bits[i] = jbits[i];
-        }
-        env->ReleaseCharArrayElements(outputBits, jbits, 0);
-        env->DeleteLocalRef(outputBits);
+        env->GetByteArrayRegion (inBuffer, 0, con->nbyte, reinterpret_cast<jbyte*>(con->bits));
 
-        codec2_decode(con->c2, con->buf, con->bits);
+        codec2_decode_ber(con->c2, con->buf, con->bits, 0.0);
 
-        jshort *jbuf = env->GetShortArrayElements(inputBuffer, 0);
-        for (i = 0; i < con->samples; i++) {
-            // Upsamling F*2
-            jbuf[i * 2] = con->buf[i];
-            jbuf[i * 2 + 1] = con->buf[i];
-        }
-        env->ReleaseShortArrayElements(inputBuffer, jbuf, 0);
-        env->DeleteLocalRef(inputBuffer);
+        env->SetShortArrayRegion(outBuffer, 0, con->samples, con->buf);
+
         return 0;
     }
 
@@ -110,7 +95,7 @@ namespace Java_com_ustadmobile_codec2_Codec2 {
             {"getBitsSize",        "(J)I",     (void *) c2bits},
             {"destroy",            "(J)I",     (void *) destroy},
             {"encode",             "(J[S[C)J", (void *) encode},
-            {"decode",             "(J[S[C)J", (void *) decode}};
+            {"decode",             "(J[S[B)J", (void *) decode}};
 
 }
 

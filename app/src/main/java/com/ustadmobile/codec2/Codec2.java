@@ -28,5 +28,14 @@ public class Codec2 {
 
     public native static long encode(long con, short[] buf, char[] bits);
 
-    public native static long decode(long con, short[] buf, char[] bits);
+    /**
+     * Decode one frame from codec2.
+     *
+     * @param con pointer long, as from the create method
+     * @param outputBuffer buffer which will be filled with raw PCM audio decoded
+     * @param bits input buffer containing one frame of audio
+     *
+     * @return 0 on successful completion
+     */
+    public native static long decode(long con, short[] outputBuffer, byte[] bits);
 }

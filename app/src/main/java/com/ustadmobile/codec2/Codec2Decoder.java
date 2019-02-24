@@ -11,13 +11,13 @@ import java.nio.ByteOrder;
  *
  * This can be played back using something along the lines of the following:
  *
- * int intSize = AudioTrack.getMinBufferSize(16000,
+ * int intSize = AudioTrack.getMinBufferSize(8000,
  *                 AudioFormat.CHANNEL_CONFIGURATION_MONO,
  *                 AudioFormat.ENCODING_PCM_16BIT);
  *
  * AudioTrack track = new AudioTrack(
  *                 AudioManager.STREAM_MUSIC,
- *                 16000,
+ *                 8000,
  *                 AudioFormat.CHANNEL_OUT_MONO,
  *                 AudioFormat.ENCODING_PCM_16BIT,
  *                 intSize,
@@ -28,8 +28,6 @@ public class Codec2Decoder {
     private InputStream input;
 
     private long codec2Con;
-
-    private char[] codec2InBuf;
 
     private byte[] codec2InBufBytes;
 
@@ -48,14 +46,14 @@ public class Codec2Decoder {
         this.input = input;
         codec2Con = Codec2.create(codec2Mode);
 
-        codec2InBuf = new char[Codec2.getBitsSize(codec2Con)];
-        codec2InBufBytes = new byte[codec2InBuf.length];
+        int nBytes = Codec2.getBitsSize(codec2Con);
+        int nByte = (nBytes + 7) / 8;
+        codec2InBufBytes = new byte[nBytes];
 
-        //multiply by two because the JNI will upsample from 8Khz to 16Khz
-        rawAudioOutBuf = new short[Codec2.getSamplesPerFrame(codec2Con) * 2];
+        rawAudioOutBuf = new short[Codec2.getSamplesPerFrame(codec2Con)];
 
         //multiply by two to handle upsampling, and two to handle the fact that output is in shorts (2 bytes)
-        rawAudioOutBytesBuffer = ByteBuffer.allocate(Codec2.getSamplesPerFrame(codec2Con) * 2 * 2);
+        rawAudioOutBytesBuffer = ByteBuffer.allocate(Codec2.getSamplesPerFrame(codec2Con) * 2);
         rawAudioOutBytesBuffer.order(ByteOrder.nativeOrder());
     }
 
@@ -70,17 +68,14 @@ public class Codec2Decoder {
     public ByteBuffer readFrame() throws IOException {
         int bytesRead = input.read(codec2InBufBytes);
         if(bytesRead == codec2InBufBytes.length) {
-            //should be read from stream as character array of this length. The c2dec method reads in as char
-            for (int i = 0; i < codec2InBufBytes.length; i++) {
-                codec2InBuf[i] = (char) codec2InBufBytes[i];
-            }
-
-            Codec2.decode(codec2Con, rawAudioOutBuf, codec2InBuf);
+            Codec2.decode(codec2Con, rawAudioOutBuf, codec2InBufBytes);
 
             rawAudioOutBytesBuffer.clear();
             for (int i = 0; i < rawAudioOutBuf.length; i++) {
                 rawAudioOutBytesBuffer.putShort(rawAudioOutBuf[i]);
             }
+
+
             return rawAudioOutBytesBuffer;
         }else {
             return null;
