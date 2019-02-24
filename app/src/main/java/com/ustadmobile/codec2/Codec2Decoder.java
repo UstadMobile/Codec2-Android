@@ -11,7 +11,7 @@ import java.nio.ByteOrder;
  *
  * This can be played back using something along the lines of the following:
  *
- * int intSize = AudioTrack.getMinBufferSize(8000,
+ * int minBufferSize = AudioTrack.getMinBufferSize(8000,
  *                 AudioFormat.CHANNEL_CONFIGURATION_MONO,
  *                 AudioFormat.ENCODING_PCM_16BIT);
  *
@@ -20,7 +20,7 @@ import java.nio.ByteOrder;
  *                 8000,
  *                 AudioFormat.CHANNEL_OUT_MONO,
  *                 AudioFormat.ENCODING_PCM_16BIT,
- *                 intSize,
+ *                 Math.max(minBufferSize, decoder.getOutputBufferSize(),
  *                 AudioTrack.MODE_STREAM);
  */
 public class Codec2Decoder {
@@ -57,6 +57,9 @@ public class Codec2Decoder {
         rawAudioOutBytesBuffer.order(ByteOrder.nativeOrder());
     }
 
+    public int getOutputBufferSize() {
+        return rawAudioOutBytesBuffer.capacity();
+    }
 
     /**
      * Read and decode a frame of audio.
