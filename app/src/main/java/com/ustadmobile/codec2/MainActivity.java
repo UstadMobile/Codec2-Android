@@ -1,16 +1,12 @@
 package com.ustadmobile.codec2;
 
 import android.content.res.AssetManager;
-import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -28,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
                 AudioFormat.CHANNEL_CONFIGURATION_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
 
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         AudioTrack track = new AudioTrack(
                 AudioManager.STREAM_MUSIC,
                 16000,
@@ -37,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
                 intSize,
                 AudioTrack.MODE_STREAM);
         track.play();
+
 
 
         byte[] boutBuf = new byte[2];
