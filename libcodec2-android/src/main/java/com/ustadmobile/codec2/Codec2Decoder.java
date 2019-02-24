@@ -35,6 +35,8 @@ public class Codec2Decoder {
 
     private ByteBuffer rawAudioOutBytesBuffer;
 
+    private int samplesPerFrame;
+
     /**
      * Create and allocate new decoder
      *
@@ -53,12 +55,22 @@ public class Codec2Decoder {
         rawAudioOutBuf = new short[Codec2.getSamplesPerFrame(codec2Con)];
 
         //multiply by two to handle upsampling, and two to handle the fact that output is in shorts (2 bytes)
-        rawAudioOutBytesBuffer = ByteBuffer.allocate(Codec2.getSamplesPerFrame(codec2Con) * 2);
+        samplesPerFrame =Codec2.getSamplesPerFrame(codec2Con);
+        rawAudioOutBytesBuffer = ByteBuffer.allocate(samplesPerFrame * 2);
+
         rawAudioOutBytesBuffer.order(ByteOrder.nativeOrder());
     }
 
     public int getOutputBufferSize() {
         return rawAudioOutBytesBuffer.capacity();
+    }
+
+    public int getSamplesPerFrame() {
+        return samplesPerFrame;
+    }
+
+    public int getInputBufferSize() {
+        return codec2InBufBytes.length;
     }
 
     /**
