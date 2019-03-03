@@ -14,6 +14,11 @@ buildscript {
     }
 }
 
+ext.localProperties = new Properties()
+ext.localProperties.load(new FileInputStream(project.file("local.properties")))
+
+ext.abiFilters = "x86_64;armeabi-v7a"
+
 allprojects {
     repositories {
         google()

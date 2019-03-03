@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 
+
 android {
     compileSdkVersion 28
 
@@ -20,8 +21,8 @@ android {
             }
         }
         ndk {
-            abiFilters 'x86_64', 'armeabi-v7a'
-
+            abiFilters = []
+            abiFilters.addAll(rootProject.ext.abiFilters.split(';').collect{it as String})
         }
     }
     buildTypes {
@@ -37,7 +38,63 @@ android {
     }
     sourceSets {
         main {
-            jniLibs.srcDirs = ['src/main/cpp/imported-lib/']
+            jniLibs.srcDirs = ['build/imported-lib']
+        }
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'externalNativeBuildRelease') {
+        task.dependsOn compileCodec2
+    } else if (task.name == 'externalNativeBuildDebug') {
+        task.dependsOn compileCodec2
+    }
+}
+
+// As per: https://github.com/googlesamples/android-ndk/blob/master/hello-libs/app/build.gradle
+task compileCodec2 {
+    doFirst {
+        project.file("build/codec2_build_linux").mkdirs()
+        for(String abi : rootProject.ext.abiFilters.split(";")) {
+            project.file("build/codec2_build_android_" + abi).mkdirs()
+            project.file("build/imported-lib/"+abi).mkdirs()
+        }
+
+    }
+
+    doLast {
+        exec {
+            workingDir "$projectDir/build/codec2_build_linux"
+            commandLine "/usr/bin/cmake", "$projectDir/src/codec2"
+        }
+
+        exec {
+            workingDir "$projectDir/build/codec2_build_linux"
+            commandLine "/usr/bin/make"
+        }
+
+
+        for(String abi : rootProject.ext.abiFilters.split(";")) {
+            System.out.println("Handle abi " + abi)
+            exec {
+                workingDir "$projectDir/build/codec2_build_android_" + abi
+                commandLine "/usr/bin/cmake", "$projectDir/src/codec2",
+                        "-DCMAKE_TOOLCHAIN_FILE=" + android.ndkDirectory + "/build/cmake/android.toolchain.cmake",
+                        "-DUNITTEST=FALSE",
+                        "-DGENERATE_CODEBOOK=$projectDir/build/codec2_build_linux/src/generate_codebook",
+                        "-DANDROID_NATIVE_API_LEVEL=23", "-DANDROID_ABI="+abi,
+                        "-DANDROID_STL=c++_shared"
+            }
+
+            exec {
+                workingDir "$projectDir/build/codec2_build_android_" + abi
+                commandLine "/usr/bin/cmake", "--build", "."
+            }
+
+            copy {
+                from "$projectDir/build/codec2_build_android_" + abi +"/src/libcodec2.so"
+                into "$projectDir/build/imported-lib/"+abi
+            }
         }
     }
 }

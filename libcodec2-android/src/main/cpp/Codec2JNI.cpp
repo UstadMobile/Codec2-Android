@@ -1,5 +1,5 @@
 #include <jni.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include "codec2/codec2_fdmdv.h"
 #include "codec2/codec2.h"
 

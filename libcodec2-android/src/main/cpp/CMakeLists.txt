@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.4.1)
 set(main_DIR ${CMAKE_SOURCE_DIR})
 add_library(libcodec2 SHARED IMPORTED)
 set_target_properties(libcodec2 PROPERTIES IMPORTED_LOCATION
-        ${main_DIR}/imported-lib/${ANDROID_ABI}/libcodec2.so)
+        ${main_DIR}/../../../build/imported-lib/${ANDROID_ABI}/libcodec2.so)
 
 include_directories(${main_DIR}/codec2/)
 
