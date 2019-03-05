@@ -1,4 +1,19 @@
+
+apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'com.android.library'
+
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "digital.wup:android-maven-publish:3.6.2"
+    }
+}
+
+
 
 
 android {
@@ -10,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -22,7 +37,7 @@ android {
         }
         ndk {
             abiFilters = []
-            abiFilters.addAll(rootProject.ext.abiFilters.split(';').collect{it as String})
+            abiFilters.addAll(rootProject.ext.ABI_FILTERS.split(';').collect{it as String})
         }
     }
     buildTypes {
@@ -43,6 +58,7 @@ android {
     }
 }
 
+// As per: https://github.com/googlesamples/android-ndk/blob/master/hello-libs/app/build.gradle
 tasks.whenTaskAdded { task ->
     if (task.name == 'externalNativeBuildRelease') {
         task.dependsOn compileCodec2
@@ -51,11 +67,10 @@ tasks.whenTaskAdded { task ->
     }
 }
 
-// As per: https://github.com/googlesamples/android-ndk/blob/master/hello-libs/app/build.gradle
 task compileCodec2 {
     doFirst {
         project.file("build/codec2_build_linux").mkdirs()
-        for(String abi : rootProject.ext.abiFilters.split(";")) {
+        for(String abi : rootProject.ext.ABI_FILTERS.split(";")) {
             project.file("build/codec2_build_android_" + abi).mkdirs()
             project.file("build/imported-lib/"+abi).mkdirs()
         }
@@ -74,7 +89,7 @@ task compileCodec2 {
         }
 
 
-        for(String abi : rootProject.ext.abiFilters.split(";")) {
+        for(String abi : rootProject.ext.ABI_FILTERS.split(";")) {
             System.out.println("Handle abi " + abi)
             exec {
                 workingDir "$projectDir/build/codec2_build_android_" + abi
@@ -101,9 +116,27 @@ task compileCodec2 {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'com.android.support:support-annotations:28.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+publishing {
+    publications {
+        mavenAar(MavenPublication) {
+            from components.android
+
+            groupId rootProject.group
+            artifactId project.name
+            version "${rootProject.version}"
+        }
+    }
+
+    repositories {
+        //Set this in projectdir/extrasettings.gradle
+        maven {
+            url rootProject.file(rootProject.ext.buildConfigProperties['repo.dir']).getAbsolutePath()
+        }
+    }
 }

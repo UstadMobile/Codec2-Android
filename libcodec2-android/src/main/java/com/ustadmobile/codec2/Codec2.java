@@ -1,5 +1,8 @@
 package com.ustadmobile.codec2;
 
+import android.support.annotation.RequiresApi;
+
+@RequiresApi(23)
 public class Codec2 {
 
     static {
