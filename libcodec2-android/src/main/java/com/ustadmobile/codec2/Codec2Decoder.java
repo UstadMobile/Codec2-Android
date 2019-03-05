@@ -1,5 +1,7 @@
 package com.ustadmobile.codec2;
 
+import android.support.annotation.RequiresApi;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -23,6 +25,7 @@ import java.nio.ByteOrder;
  *                 Math.max(minBufferSize, decoder.getOutputBufferSize(),
  *                 AudioTrack.MODE_STREAM);
  */
+@RequiresApi(23)
 public class Codec2Decoder {
 
     private InputStream input;
