@@ -14,12 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import prototypemanager.ustadmobile.com.appcodec2demo.R;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.ustadmobile.codec2.R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
         new Thread(() -> {
             AssetManager asMgr = getApplicationContext().getAssets();
@@ -37,9 +39,9 @@ public class MainActivity extends AppCompatActivity {
             track.play();
             Codec2Decoder codec2 = null;
             try {
-                InputStream is = asMgr.open("video2-2400.c2");
+                InputStream is = asMgr.open("audio.c2");
                 is.skip(Codec2.CODEC2_FILE_HEADER_SIZE);
-                codec2 = new Codec2Decoder(is, Codec2.CODEC2_MODE_2400);
+                codec2 = new Codec2Decoder(is, Codec2.CODEC2_MODE_3200);
 
                 while (true) {
                     ByteBuffer buffer = codec2.readFrame();
