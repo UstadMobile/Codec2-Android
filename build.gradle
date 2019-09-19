@@ -24,7 +24,7 @@ ext.ABI_FILTERS = ext.buildConfigProperties["abi.filters"]
 
 
 group = "com.ustadmobile.codec2"
-version = "0.8-SNAPSHOT64"
+version = "0.8-SNAPSHOT64-2"
 
 allprojects {
     repositories {
